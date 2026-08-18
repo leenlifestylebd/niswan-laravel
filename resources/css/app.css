@@ -127,6 +127,28 @@ h1, h2, h3, .font-display {
 .btn-gold:hover { background: transparent; color: var(--color-accent); }
 .btn-gold:disabled { opacity: 0.55; }
 
+/* WhatsApp — অফিসিয়াল ব্র্যান্ড রঙ (#25D366, হোভারে #128C7E)।
+   লেখা গাঢ় রাখা হয়েছে — উজ্জ্বল সবুজে সাদা লেখার কনট্রাস্ট কম (২.৩:১),
+   পড়তে কষ্ট হয়; সাইটের সোনালি বাটনেও একই নিয়ম। */
+.btn-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  background: #25d366;
+  color: #072b1e;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 0.95rem 2rem;
+  border: 1px solid #25d366;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+.btn-whatsapp:hover {
+  background: #128c7e;
+  border-color: #128c7e;
+  color: #ffffff;
+}
+
 /* সেকেন্ডারি — আউটলাইন */
 .btn-outline {
   display: inline-flex;
