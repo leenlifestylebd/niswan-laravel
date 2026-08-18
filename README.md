@@ -47,7 +47,9 @@
   রঙ (অ্যাকসেন্ট/ব্যাকগ্রাউন্ড), ডেলিভারি চার্জ, **এনক্রিপ্টেড সিক্রেট টোকেন**
 - অ্যাডমিন পাসওয়ার্ড বদল
 
-> অ্যাডমিন প্যানেল হালকা থিমেই আছে (পড়তে সুবিধা) — শুধু স্টোরফ্রন্ট ডার্ক।
+অ্যাডমিন প্যানেলও স্টোরফ্রন্টের মতো **ডার্ক লাক্সারি** — বাঁয়ে স্থায়ী **সাইডবার**
+(মোবাইলে ড্রয়ার), একই রঙ ও ফন্ট, ধারালো কোণা। পেজগুলো সার্ভার-রেন্ডারড থাকে
+(SPA নয়) — ফর্ম সাবমিট ও রিডাইরেক্ট ফ্লো নির্ভরযোগ্য রাখতে।
 
 **ইন্টিগ্রেশন**
 - Telegram — নতুন অর্ডারে নোটিফিকেশন
@@ -165,6 +167,7 @@ resources/views/
   partials/                  topbar, banner-hero, marquee-strip, showcase, assurance,
                              gallery, voices, order, site-footer, sticky-bar
   admin/                     orders, products/, reviews, settings, analytics, labels, login
+  admin/partials/sidebar     অ্যাডমিন সাইডবার (ডেস্কটপে স্থায়ী, মোবাইলে ড্রয়ার)
 routes/{web,admin}.php
 docker/                      nginx.conf, supervisord.conf, php.ini, entrypoint.sh
 ```
