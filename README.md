@@ -23,12 +23,14 @@
 2. **ঘোষণা স্ট্রিপ** — একটানা চলমান মার্কি
 3. **শোকেস** — থাম্বনেইল + বড় ছবি, ফিচার লিস্ট, সাইজ
 4. **প্রতিশ্রুতি** — নাম্বারড কলাম (০১–০৪)
-5. **গ্যালারি** — অসম উচ্চতার এডিটোরিয়াল গ্রিড
-6. **গ্রাহকের কথা** — রিভিউ স্ক্রিনশট স্লাইডার
-7. **অর্ডার ফর্ম** — ভ্যারিয়েন্ট/সাইজ/পরিমাণ/এলাকা, ডেলিভারি চার্জ হিসাব,
+5. **গ্রাহকের কথা** — রিভিউ স্ক্রিনশট স্লাইডার
+6. **অর্ডার ফর্ম** — ভ্যারিয়েন্ট/সাইজ/পরিমাণ/এলাকা, ডেলিভারি চার্জ হিসাব,
    **ফোন ১১-ডিজিট যাচাই** (`^01\d{9}$`, `+880`/`880` প্রিফিক্স গ্রহণযোগ্য) —
    client ও server দুই জায়গায়
-8. **ফুটার** + মোবাইলে নিচে **স্থায়ী অর্ডার বার** (WhatsApp + দাম সহ CTA)
+7. **এক লাইনের ফুটার** — ব্র্যান্ড · লিংক · কপিরাইট, সব এক সারিতে
+
+WhatsApp: ডেস্কটপে নিচের ডান কোণে ভাসমান বাটন, মোবাইলে নিচের **স্থায়ী অর্ডার বার**
+(WhatsApp + দাম সহ CTA)।
 
 - কোন প্রোডাক্টটি দেখাবে তা অ্যাডমিন → সেটিংস থেকে বাছাই; খালি রাখলে প্রথম সক্রিয়
   প্রোডাক্ট। বাকি প্রোডাক্টগুলো অ্যাডমিনে থাকে, সাইটে দেখায় না।
@@ -162,10 +164,10 @@ app/
     FbCapiService            Meta Conversions API (event_id dedup)
   Support/                   Phone (BD নাম্বার), helpers (bdt/bn_num/lighten)
 resources/views/
-  layouts/{app,admin}        পাবলিক (ডার্ক) ও অ্যাডমিন (হালকা) লেআউট — রঙ CSS variable
+  layouts/{app,admin}        পাবলিক ও অ্যাডমিন লেআউট (দুটোই ডার্ক) — রঙ CSS variable
   landing.blade.php          সিঙ্গেল পেজ — সব সেকশন এখানে include হয়
   partials/                  topbar, banner-hero, marquee-strip, showcase, assurance,
-                             gallery, voices, order, site-footer, sticky-bar
+                             voices, order, site-footer, whatsapp-float, sticky-bar
   admin/                     orders, products/, reviews, settings, analytics, labels, login
   admin/partials/sidebar     অ্যাডমিন সাইডবার (ডেস্কটপে স্থায়ী, মোবাইলে ড্রয়ার)
 routes/{web,admin}.php

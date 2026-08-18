@@ -1,49 +1,42 @@
 @php $msg = rawurlencode('আসসালামু আলাইকুম, '.$site['brandName'].' থেকে অর্ডার করতে চাই।'); @endphp
 
+{{-- এক লাইনের অনুভূমিক ফুটার --}}
 <footer class="border-t border-[color:var(--color-line)] bg-[color:var(--color-bg)]">
-    <div class="mx-auto max-w-6xl px-6 py-16 sm:px-10">
-        <div class="grid gap-10 sm:grid-cols-3">
-            {{-- ব্র্যান্ড --}}
-            <div>
-                @if ($site['logoUrl'])
-                    <img src="{{ $site['logoUrl'] }}" alt="{{ $site['brandName'] }}"
-                         style="height: {{ $site['logoHeight'] }}px" class="w-auto max-w-[180px] object-contain">
-                @else
-                    <p class="font-display text-2xl tracking-[0.28em]">{{ mb_strtoupper($site['brandName']) }}</p>
-                @endif
-                <p class="mt-4 max-w-xs text-sm leading-relaxed text-[color:var(--color-muted)]">{{ $site['footerText'] }}</p>
-            </div>
+    {{-- sm:pb-24 — নিচের ডান কোণে ভাসমান WhatsApp বাটন যেন টেক্সট না ঢাকে --}}
+    <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-6 gap-y-3 px-6 py-5 text-sm sm:justify-between sm:px-10 sm:pb-24">
 
-            {{-- যোগাযোগ --}}
-            <div>
-                <p class="text-xs uppercase tracking-[0.22em] text-[color:var(--color-muted)]">যোগাযোগ</p>
-                <ul class="mt-4 space-y-2.5 text-sm">
-                    <li><a href="tel:{{ $site['phone'] }}" class="transition hover:text-[color:var(--color-accent)]">{{ $site['phone'] }}</a></li>
-                    <li><a href="https://wa.me/{{ $site['whatsapp'] }}?text={{ $msg }}" target="_blank" rel="noopener noreferrer" class="transition hover:text-[color:var(--color-accent)]">WhatsApp</a></li>
-                    @if ($site['facebook'])
-                        <li><a href="{{ $site['facebook'] }}" target="_blank" rel="noopener noreferrer" class="transition hover:text-[color:var(--color-accent)]">Facebook</a></li>
-                    @endif
-                    @if ($site['instagram'])
-                        <li><a href="{{ $site['instagram'] }}" target="_blank" rel="noopener noreferrer" class="transition hover:text-[color:var(--color-accent)]">Instagram</a></li>
-                    @endif
-                </ul>
-            </div>
+        {{-- ব্র্যান্ড --}}
+        <a href="#top" class="shrink-0">
+            @if ($site['logoUrl'])
+                <img src="{{ $site['logoUrl'] }}" alt="{{ $site['brandName'] }}"
+                     style="height: {{ min($site['logoHeight'], 28) }}px" class="w-auto max-w-[140px] object-contain">
+            @else
+                <span class="font-display text-base tracking-[0.24em]">{{ mb_strtoupper($site['brandName']) }}</span>
+            @endif
+        </a>
 
-            {{-- এই পেজে --}}
-            <div>
-                <p class="text-xs uppercase tracking-[0.22em] text-[color:var(--color-muted)]">এই পেজে</p>
-                <ul class="mt-4 space-y-2.5 text-sm">
-                    <li><a href="#detail" class="transition hover:text-[color:var(--color-accent)]">প্রোডাক্ট</a></li>
-                    <li><a href="#reviews" class="transition hover:text-[color:var(--color-accent)]">রিভিউ</a></li>
-                    <li><a href="#order" class="transition hover:text-[color:var(--color-accent)]">অর্ডার</a></li>
-                </ul>
-            </div>
-        </div>
+        {{-- লিংক --}}
+        <nav class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[color:var(--color-muted)]">
+            <a href="#detail" class="transition hover:text-[color:var(--color-accent)]">প্রোডাক্ট</a>
+            <a href="#reviews" class="transition hover:text-[color:var(--color-accent)]">রিভিউ</a>
+            <a href="#order" class="transition hover:text-[color:var(--color-accent)]">অর্ডার</a>
+            <span class="text-[color:var(--color-accent)]">◆</span>
+            <a href="tel:{{ $site['phone'] }}" class="transition hover:text-[color:var(--color-accent)]">{{ $site['phone'] }}</a>
+            <a href="https://wa.me/{{ $site['whatsapp'] }}?text={{ $msg }}" target="_blank" rel="noopener noreferrer"
+               class="transition hover:text-[color:var(--color-accent)]">WhatsApp</a>
+            @if ($site['facebook'])
+                <a href="{{ $site['facebook'] }}" target="_blank" rel="noopener noreferrer"
+                   class="transition hover:text-[color:var(--color-accent)]">Facebook</a>
+            @endif
+            @if ($site['instagram'])
+                <a href="{{ $site['instagram'] }}" target="_blank" rel="noopener noreferrer"
+                   class="transition hover:text-[color:var(--color-accent)]">Instagram</a>
+            @endif
+        </nav>
 
-        <div class="rule-gold mt-12"></div>
-
-        <p class="mt-6 text-center text-xs text-[color:var(--color-muted)]">
-            © {{ bn_num(date('Y')) }} {{ $site['brandName'] }} · সর্বস্বত্ব সংরক্ষিত
+        {{-- কপিরাইট --}}
+        <p class="shrink-0 text-xs text-[color:var(--color-muted)]">
+            © {{ bn_num(date('Y')) }} {{ $site['brandName'] }}
         </p>
     </div>
 

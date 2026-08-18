@@ -58,7 +58,6 @@
             @include('partials.marquee-strip')
             @include('partials.showcase')
             @include('partials.assurance')
-            @include('partials.gallery')
             @include('partials.voices')
             @include('partials.order')
         @else
@@ -74,5 +73,6 @@
     </main>
 
     @include('partials.site-footer')
+    @include('partials.whatsapp-float')
     @include('partials.sticky-bar')
 @endsection
