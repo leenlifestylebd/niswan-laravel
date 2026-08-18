@@ -13,7 +13,7 @@
 /.zed
 /auth.json
 /node_modules
-/public/build
+# /public/build — শেয়ার্ড হোস্টিংয়ে Node নেই, তাই বিল্ড করা অ্যাসেট গিটেই রাখা হয়
 /public/hot
 /public/storage
 /storage/*.key
