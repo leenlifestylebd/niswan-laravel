@@ -19,13 +19,22 @@
 
 | দরকার | Hostinger-এ কোথায় |
 |---|---|
-| PHP **8.2+** | hPanel → Advanced → **PHP Configuration** |
+| PHP **8.2+** (সুপারিশ **8.3 / 8.4**) | ওয়েবসাইটের Dashboard → Advanced → **PHP Configuration** |
 | এক্সটেনশন: `pdo_mysql`, `mbstring`, `openssl`, `curl`, `fileinfo`, `zip`, `gd`, `intl` | একই পেজের **PHP extensions** ট্যাব |
 | MySQL ডেটাবেজ | hPanel → Databases → **Management** |
 | SSH অ্যাক্সেস | hPanel → Advanced → **SSH Access** (Premium প্ল্যানে আছে) |
 
 `intl` না থাকলেও চলবে — টাকার অঙ্ক তখন ফলব্যাক দিয়ে বাংলা সংখ্যায় দেখাবে।
 বাকিগুলো অবশ্যই লাগবে।
+
+**PHP ভার্সন সম্পর্কে:** `composer.json` এ শর্ত `^8.2`, মানে ৮.২ **বা তার নতুন**
+যেকোনো ভার্সন — ৮.৩, ৮.৪, ৮.৫ সবই চলে (যাচাই করা: কোনো নির্ভরতা এদের আটকায় না)।
+তবে অ্যাপটা পরীক্ষা করা হয়েছে **৮.২**-তে, তাই বহুল-ব্যবহৃত **৮.৩ বা ৮.৪** নেওয়াই
+নিরাপদ। ভার্সন বদলানোর পর একবার চালাবেন:
+
+```bash
+composer install --no-dev -o && php artisan config:clear
+```
 
 ---
 
