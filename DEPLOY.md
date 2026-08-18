@@ -1,187 +1,187 @@
-# ডেপ্লয় গাইড — NISWAN Store
+# ডেপ্লয় গাইড — Hostinger Premium (শেয়ার্ড হোস্টিং)
 
-দুটো পথ দেওয়া আছে। আপনার হোস্টিং যেটা, সেই অংশে যান:
+অ্যাপটা **MySQL/MariaDB ও PostgreSQL দুটোতেই চলে**, তাই Hostinger-এর MySQL দিয়েই
+সব কাজ করবে — বাইরের কোনো ডেটাবেজ সার্ভিস লাগবে না।
 
-- **পথ ক** — cPanel / DirectAdmin শেয়ার্ড হোস্টিং (যেমন `app.leen.com.bd` যেভাবে চলছে)
-- **পথ খ** — VPS + Coolify + Cloudflare Tunnel (Dockerfile দিয়ে)
+আপনার WordPress সাইট আগের মতোই চলবে; এটা একটা **আলাদা সাবডোমেইনে** বসবে
+(যেমন `shop.leen.com.bd`)।
+
+> **কিউ ওয়ার্কার বা ক্রন জব লাগে না** — অ্যাপে কোনো queued job বা scheduled task নেই।
 
 ---
 
-## ০. আগে যা নিশ্চিত করতেই হবে
+## ০. যা লাগবে
 
-| দরকার | কেন |
+| দরকার | Hostinger-এ কোথায় |
 |---|---|
-| **PHP 8.2 বা তার উপরে** | Laravel 12-এর ন্যূনতম |
-| **PostgreSQL** | ⚠️ নিচের নোট দেখুন — MySQL দিয়ে চলবে না |
-| PHP এক্সটেনশন: `pdo_pgsql`, `intl`, `openssl`, `mbstring`, `fileinfo`, `curl`, `zip`, `gd` | DB, বাংলা সংখ্যা, টোকেন এনক্রিপশন, ছবি |
-| আউটবাউন্ড HTTPS খোলা | Telegram / Steadfast / Meta CAPI কল করে |
+| PHP **8.2+** | hPanel → Advanced → **PHP Configuration** |
+| এক্সটেনশন: `pdo_mysql`, `mbstring`, `openssl`, `curl`, `fileinfo`, `zip`, `gd`, `intl` | একই পেজের **PHP extensions** ট্যাব |
+| MySQL ডেটাবেজ | hPanel → Databases → **Management** |
+| SSH অ্যাক্সেস | hPanel → Advanced → **SSH Access** (Premium প্ল্যানে আছে) |
 
-> ### ⚠️ MySQL দিয়ে এই অ্যাপ চলবে না
->
-> শুধু কনফিগ বদলালেই হবে না — কোডে PostgreSQL-নির্দিষ্ট জিনিস আছে:
-> - `products` টেবিলে **`jsonb`** কলাম (images, sizes, variants, features)
-> - অ্যানালিটিক্সে **`date_trunc()`**, **`count(*) FILTER (WHERE …)`**, **`::int`**,
->   **`interval '5 minutes'`** — সব Postgres সিনট্যাক্স
->
-> আপনার হোস্টিংয়ে Postgres না থাকলে দুটো উপায়: হোস্টিং থেকে Postgres চালু করান,
-> অথবা বাইরের একটা ম্যানেজড Postgres (Neon / Supabase / Railway — ফ্রি টিয়ার আছে)
-> নিয়ে শুধু `DB_*` সেই সার্ভারে পয়েন্ট করুন। দ্বিতীয়টা শেয়ার্ড হোস্টিংয়ে সবচেয়ে সহজ।
-
-**কিউ ওয়ার্কার বা ক্রন লাগে না** — অ্যাপে কোনো queued job বা scheduled task নেই।
+`intl` না থাকলেও চলবে — টাকার অঙ্ক তখন ফলব্যাক দিয়ে বাংলা সংখ্যায় দেখাবে।
+বাকিগুলো অবশ্যই লাগবে।
 
 ---
 
-## পথ ক — cPanel / DirectAdmin শেয়ার্ড হোস্টিং
+## ১. ডেটাবেজ বানান
 
-আপনার সার্ভারের গঠন `~/domains/<domain>/` ধরে লেখা।
+hPanel → **Databases → Management** → নতুন ডেটাবেজ:
 
-### ১. কোড আপলোড
+- Database name: `u123456_niswan` (Hostinger নিজেই prefix বসাবে)
+- Username, password — **তিনটাই কপি করে রাখুন**, `.env` এ লাগবে
 
-SSH থাকলে:
+Character set যেন **utf8mb4** হয় (বাংলা লেখার জন্য) — Hostinger-এ এটাই ডিফল্ট।
 
-```bash
-cd ~/domains/leen.com.bd && git clone https://github.com/leenlifestylebd/niswan-laravel.git niswan
-```
+---
 
-SSH না থাকলে: রিপো থেকে ZIP নামিয়ে File Manager দিয়ে `~/domains/leen.com.bd/niswan/` এ আনজিপ করুন।
+## ২. সাবডোমেইন বানান
 
-> কোডটা `public_html`-এর **বাইরে** রাখুন। শুধু `public/` ফোল্ডারটা ওয়েব থেকে দেখা যাবে।
+hPanel → Domains → **Subdomains** → `shop` যোগ করুন।
 
-### ২. সাবডোমেইন বানিয়ে ডকুমেন্ট রুট ঠিক করুন
+Hostinger এটার জন্য ফোল্ডার বানাবে: `~/domains/shop.leen.com.bd/public_html`
 
-কন্ট্রোল প্যানেলে নতুন সাবডোমেইন (যেমন `shop.leen.com.bd`) খুলে তার
-**Document Root** দিন:
+---
 
-```
-/home/<user>/domains/leen.com.bd/niswan/public
-```
+## ৩. কোড আপলোড (SSH)
 
-ডকুমেন্ট রুট বদলাতে না পারলে `public_html/shop` থেকে symlink করুন:
+hPanel → Advanced → **SSH Access** থেকে হোস্ট, পোর্ট ও ইউজারনেম নিন, তারপর:
 
 ```bash
-ln -s ~/domains/leen.com.bd/niswan/public ~/domains/leen.com.bd/public_html/shop
+ssh -p <port> u123456@<host>
 ```
-
-### ৩. নির্ভরতা ইনস্টল
 
 ```bash
-cd ~/domains/leen.com.bd/niswan && composer install --no-dev --optimize-autoloader
+cd ~/domains/shop.leen.com.bd && git clone https://github.com/leenlifestylebd/niswan-laravel.git app
 ```
 
-Composer না থাকলে লোকালি `composer install --no-dev -o` চালিয়ে `vendor/` ফোল্ডারসহ আপলোড করুন।
+এখন গঠনটা এমন:
 
-### ৪. ফ্রন্টএন্ড অ্যাসেট
+```
+~/domains/shop.leen.com.bd/
+├── app/            ← Laravel কোড (ওয়েব থেকে দেখা যাবে না)
+└── public_html/    ← এটা app/public এর দিকে দেখাবে (পরের ধাপ)
+```
 
-শেয়ার্ড হোস্টিংয়ে সাধারণত Node থাকে না। **নিজের পিসিতে বিল্ড করে আপলোড করুন:**
+### public_html কে app/public এর দিকে পাঠান
+
+```bash
+cd ~/domains/shop.leen.com.bd && rm -rf public_html && ln -s app/public public_html
+```
+
+> `public_html` মুছে ফেলার আগে দেখে নিন ভেতরে দরকারি কিছু নেই (নতুন সাবডোমেইনে
+> শুধু Hostinger-এর ডিফল্ট পেজ থাকে)।
+
+symlink কাজ না করলে বিকল্প: `app/public` এর সব ফাইল `public_html` এ কপি করে
+`public_html/index.php` এর দুটো পাথ `__DIR__.'/../app/...'` করে দিন।
+
+---
+
+## ৪. নির্ভরতা ইনস্টল
+
+```bash
+cd ~/domains/shop.leen.com.bd/app && composer install --no-dev --optimize-autoloader
+```
+
+Composer না পেলে:
+
+```bash
+curl -sS https://getcomposer.org/installer | php && php composer.phar install --no-dev --optimize-autoloader
+```
+
+---
+
+## ৫. ফ্রন্টএন্ড অ্যাসেট (নিজের পিসিতে বিল্ড করে আপলোড)
+
+Hostinger শেয়ার্ড হোস্টিংয়ে **Node.js নেই**, তাই CSS/JS নিজের কম্পিউটারে বিল্ড করতে হবে:
 
 ```bash
 npm run build
 ```
 
-তারপর তৈরি হওয়া `public/build/` ফোল্ডারটা সার্ভারের `niswan/public/build/` এ আপলোড করুন।
-(`.gitignore` এ থাকায় এটা রিপোতে যায় না — প্রতিবার ডিজাইন বদলালে আবার আপলোড করতে হবে।)
+তারপর তৈরি হওয়া `public/build/` ফোল্ডারটা সার্ভারের
+`~/domains/shop.leen.com.bd/app/public/build/` এ আপলোড করুন
+(hPanel → File Manager, অথবা FileZilla/SFTP)।
 
-### ৫. `.env` তৈরি
+> ⚠️ `public/build` গিটে যায় না — **ডিজাইন বা CSS বদলালে প্রতিবার আবার আপলোড করতে হবে**,
+> নাহলে সাইট স্টাইল ছাড়া দেখাবে।
+
+---
+
+## ৬. `.env` তৈরি
 
 ```bash
-cd ~/domains/leen.com.bd/niswan && cp .env.example .env && php artisan key:generate
+cd ~/domains/shop.leen.com.bd/app && cp .env.example .env && php artisan key:generate
 ```
 
-`.env` এ বসান:
+`nano .env` দিয়ে এডিট করুন:
 
 ```
+APP_NAME=NISWAN
 APP_ENV=production
 APP_DEBUG=false
 APP_URL=https://shop.leen.com.bd
 
-DB_CONNECTION=pgsql
-DB_HOST=...
-DB_PORT=5432
-DB_DATABASE=...
-DB_USERNAME=...
-DB_PASSWORD=...
+DB_CONNECTION=mysql
+DB_HOST=localhost
+DB_PORT=3306
+DB_DATABASE=u123456_niswan
+DB_USERNAME=u123456_niswan
+DB_PASSWORD=<আপনার পাসওয়ার্ড>
 
 ADMIN_PASSWORD=<প্রথম লগইনের পাসওয়ার্ড>
-UPLOAD_DIR=/home/<user>/domains/leen.com.bd/niswan/storage/uploads
+UPLOAD_DIR=/home/u123456/domains/shop.leen.com.bd/app/storage/uploads
 ```
 
-> 🔑 `php artisan key:generate` যে `APP_KEY` বানাবে সেটা **আলাদা করে সেভ করে রাখুন**।
-> এটা হারালে/বদলালে সেটিংসে রাখা Steadfast, Telegram, Meta টোকেন আর ডিক্রিপ্ট হবে না।
+> 🔑 **`APP_KEY` আলাদা করে সেভ করে রাখুন।** Steadfast / Telegram / Meta-র টোকেন
+> এই কী দিয়ে এনক্রিপ্ট হয়ে ডেটাবেজে থাকে — কী হারালে বা বদলালে টোকেনগুলো আর
+> ডিক্রিপ্ট হবে না, অ্যাডমিন থেকে আবার বসাতে হবে।
 
-### ৬. ডেটাবেজ ও পারমিশন
+---
+
+## ৭. ডেটাবেজ ও পারমিশন
 
 ```bash
 php artisan migrate --force --seed
 ```
 
 ```bash
-chmod -R 775 storage bootstrap/cache && mkdir -p storage/uploads
+mkdir -p storage/uploads && chmod -R 775 storage bootstrap/cache
 ```
 
-### ৭. প্রোডাকশন ক্যাশ
+---
+
+## ৮. প্রোডাকশন ক্যাশ
 
 ```bash
 php artisan config:cache && php artisan route:cache && php artisan view:cache
 ```
 
-### ৮. HTTPS
+---
 
-কন্ট্রোল প্যানেল থেকে সাবডোমেইনের জন্য **Let's Encrypt SSL** চালু করুন, আর
-"Force HTTPS" অন করুন।
+## ৯. HTTPS
+
+hPanel → Security → **SSL** → সাবডোমেইনের জন্য Let's Encrypt চালু করুন,
+তারপর **Force HTTPS** অন করুন।
 
 ---
 
-## পথ খ — VPS + Coolify + Cloudflare Tunnel
+## ১০. ডেপ্লয়ের পরে — চেকলিস্ট
 
-রিপোতে `Dockerfile` ও `docker/` (nginx + php-fpm + supervisor) রেডি আছে।
-
-1. Coolify-তে **New Resource → Dockerfile** — এই রিপো, expose port **80**।
-2. Coolify-তে আলাদা **PostgreSQL** সার্ভিস বানান।
-3. Environment variables:
-   ```
-   APP_KEY=base64:...        # php artisan key:generate --show দিয়ে বানিয়ে নিন
-   APP_ENV=production
-   APP_DEBUG=false
-   APP_URL=https://<domain>
-   DB_CONNECTION=pgsql
-   DB_HOST=<coolify postgres host>
-   DB_PORT=5432
-   DB_DATABASE=... DB_USERNAME=... DB_PASSWORD=...
-   ADMIN_PASSWORD=<প্রথম লগইন>
-   ```
-4. **Persistent volume**: `/app/storage`
-   না দিলে redeploy করলেই আপলোড করা সব ছবি মুছে যাবে।
-5. **Domains** ফিল্ডে apex ও www দুটোই: `https://domain,https://www.domain`
-6. Cloudflare DNS — `@` এবং `www` দুটোই **Proxied CNAME**:
-   ```
-   35ac07ef-c56d-4b80-bec7-26db28161178.cfargotunnel.com
-   ```
-   (একই tunnel, ingress catch-all — cloudflared-এ কিছু বদলাতে হবে না)
-
-> ⚠️ VPS-এর মুম্বাই IP বাংলাদেশ থেকে blackholed। **সরাসরি A-রেকর্ড দেবেন না** —
-> অবশ্যই Cloudflare Tunnel দিয়ে সার্ভ করতে হবে।
-
-`docker/entrypoint.sh` কনটেইনার চালুর সময় নিজেই `migrate --force`, `db:seed --force`
-ও তিনটা `:cache` কমান্ড চালায় — হাতে কিছু করতে হয় না।
-
----
-
-## ডেপ্লয়ের পরে — চেকলিস্ট
-
-1. `https://<domain>/admin` এ `.env` এর `ADMIN_PASSWORD` দিয়ে লগইন
-2. **সেটিংস → অ্যাডমিন পাসওয়ার্ড** — এখনই বদলান (ডিফল্ট রাখবেন না)
-3. **সেটিংস → ল্যান্ডিং পেজ** — ব্যানার আপলোড (ডেস্কটপ + মোবাইল আলাদা), হিরো
-   হেডলাইন/সাবলাইন, কোন প্রোডাক্টটা দেখাবে
+1. `https://shop.leen.com.bd/admin` এ `.env` এর `ADMIN_PASSWORD` দিয়ে লগইন
+2. **সেটিংস → অ্যাডমিন পাসওয়ার্ড** — এখনই বদলান
+3. **সেটিংস → ল্যান্ডিং পেজ** — ব্যানার আপলোড (ডেস্কটপ + মোবাইল আলাদা),
+   হিরো হেডলাইন/সাবলাইন, কোন প্রোডাক্টটা দেখাবে
 4. **সেটিংস → ব্র্যান্ড / যোগাযোগ** — নাম, ফোন, WhatsApp (কান্ট্রি কোড সহ, `+` ছাড়া:
    `8801XXXXXXXXX`), Facebook, Instagram
 5. **সেটিংস → ডেলিভারি ও থিম** — ঢাকার ভিতরে/বাইরের চার্জ, রঙ
 6. **সেটিংস → ইন্টিগ্রেশন** — Telegram Bot Token + Chat ID, Steadfast API Key +
    Secret, Meta Pixel ID + CAPI Token
-7. **প্রোডাক্ট** — ডেমো ৫টা মুছে আসল প্রোডাক্ট যোগ করুন
+7. **প্রোডাক্ট** — ডেমো ৫টা মুছে আসল প্রোডাক্ট দিন
 8. **রিভিউ** — ডেমো মকআপ ৬টা মুছে **আসল গ্রাহকের স্ক্রিনশট** দিন
-9. **টেস্ট অর্ডার দিন** — Telegram-এ নোটিফিকেশন আসে কি না দেখুন, তারপর অ্যাডমিন
-   থেকে সেই অর্ডার ডিলিট/বাতিল করুন
-10. **বাংলাদেশি নেটওয়ার্ক (Robi/GP) থেকে সাইট খুলে দেখুন** — বিশেষ করে পথ খ-এ
+9. **একটা টেস্ট অর্ডার দিন** — Telegram-এ নোটিফিকেশন আসে কি না দেখুন, তারপর
+   অ্যাডমিন থেকে সেই অর্ডারটা মুছে দিন
+10. মোবাইল থেকে সাইট খুলে দেখুন — স্টিকি অর্ডার বার ও WhatsApp বাটন কাজ করে কি না
 
 ডেমো ডেটা একসাথে মুছতে:
 
@@ -193,15 +193,11 @@ php artisan tinker --execute="App\Models\Visit::truncate(); App\Models\Order::tr
 
 ## পরে আপডেট করতে
 
-**পথ ক (শেয়ার্ড হোস্টিং):**
-
 ```bash
-cd ~/domains/leen.com.bd/niswan && git pull && composer install --no-dev -o && php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache
+cd ~/domains/shop.leen.com.bd/app && git pull && composer install --no-dev -o && php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache
 ```
 
-ডিজাইন/CSS বদলালে লোকালি `npm run build` চালিয়ে `public/build/` আবার আপলোড করুন।
-
-**পথ খ (Coolify):** রিপোতে push করলেই Coolify নিজে রিডেপ্লয় করবে।
+ডিজাইন/CSS বদলালে লোকালি `npm run build` চালিয়ে `public/build/` আবার আপলোড করুন (ধাপ ৫)।
 
 ---
 
@@ -209,10 +205,25 @@ cd ~/domains/leen.com.bd/niswan && git pull && composer install --no-dev -o && p
 
 | উপসর্গ | কারণ / সমাধান |
 |---|---|
-| সাদা পেজ বা 500 | `storage/logs/laravel.log` দেখুন। `storage` ও `bootstrap/cache` এ লেখার পারমিশন (775) আছে কি না দেখুন |
-| CSS/JS লোড হয় না | `public/build/` আপলোড হয়নি — লোকালি `npm run build` করে আবার দিন |
-| "could not find driver" | `pdo_pgsql` এক্সটেনশন চালু নেই |
-| সেটিংসের টোকেন কাজ করছে না | `APP_KEY` বদলে গেছে — অ্যাডমিন থেকে টোকেনগুলো আবার বসান |
-| অ্যানালিটিক্সে SQL error | DB PostgreSQL নয় (উপরের ০ নং সেকশন দেখুন) |
-| আপলোড করা ছবি হারিয়ে যায় | পথ খ-তে `/app/storage` persistent volume দেওয়া হয়নি |
-| ভুল/পুরোনো কনফিগ ধরছে | `php artisan config:clear && php artisan config:cache` |
+| সাদা পেজ বা 500 | `app/storage/logs/laravel.log` দেখুন। `storage` ও `bootstrap/cache` এ ৭৭৫ পারমিশন আছে কি না দেখুন |
+| CSS/JS ছাড়া সাদামাটা পেজ | `public/build/` আপলোড হয়নি — ধাপ ৫ |
+| `could not find driver` | hPanel → PHP Configuration এ **`pdo_mysql`** টিক দেওয়া নেই |
+| `Table ... doesn't exist` | `php artisan migrate --force` চালানো হয়নি |
+| সেটিংসের টোকেন হঠাৎ কাজ করছে না | `APP_KEY` বদলে গেছে — অ্যাডমিন থেকে টোকেনগুলো আবার বসান |
+| আপলোড করা ছবি ৪০৪ | `UPLOAD_DIR` ভুল, বা `storage/uploads` এ লেখার পারমিশন নেই |
+| ৪০৪ — index.php খুঁজে পাচ্ছে না | `public_html` symlink ঠিকমতো `app/public` এ যায়নি (ধাপ ৩) |
+| পুরোনো কনফিগ ধরে আছে | `php artisan config:clear && php artisan config:cache` |
+| বাংলা লেখা `???` দেখাচ্ছে | ডেটাবেজের charset **utf8mb4** নয় |
+
+---
+
+## বিকল্প: VPS + Coolify
+
+VPS-এ দিতে চাইলে রিপোতে `Dockerfile` ও `docker/` (nginx + php-fpm + supervisor)
+রেডি আছে। সংক্ষেপে: Coolify-তে Dockerfile অ্যাপ (port 80), আলাদা Postgres বা MySQL
+সার্ভিস, persistent volume `/app/storage`, Domains-এ apex ও www দুটোই, আর
+Cloudflare DNS-এ `@` ও `www` **Proxied CNAME →
+`35ac07ef-c56d-4b80-bec7-26db28161178.cfargotunnel.com`**।
+
+> ⚠️ VPS-এর মুম্বাই IP বাংলাদেশ থেকে blackholed — সরাসরি A-রেকর্ড নয়, অবশ্যই
+> Cloudflare Tunnel দিয়ে সার্ভ করতে হবে।

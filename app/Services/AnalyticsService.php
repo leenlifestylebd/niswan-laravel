@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\DB;
 
 // হালকা, প্রাইভেসি-বান্ধব ভিজিট ট্র্যাকিং — কোনো PII সেভ হয় না।
 // visitor = hash(ip + ua + APP_KEY) → irreversible, শুধু unique গণনার জন্য।
+//
+// ⚠️ পরিসংখ্যানের কোয়েরিগুলো PostgreSQL ও MySQL/MariaDB দুই ইঞ্জিনেই চলে।
+//    ইঞ্জিন-ভেদে যেসব অংশ আলাদা (FILTER, date_trunc, interval …) সেগুলো
+//    নিচের ছোট হেল্পারগুলো তৈরি করে দেয়।
 class AnalyticsService
 {
     public function visitorHash(?string $ip, ?string $ua): string
@@ -41,11 +45,71 @@ class AnalyticsService
     public function logVisit(?string $path, ?string $ref, ?string $ip, ?string $ua): void
     {
         Visit::create([
-            'path'    => $path ?: '/',
-            'ref'     => $this->refHost($ref),
+            'path'    => mb_substr($path ?: '/', 0, 191),
+            'ref'     => mb_substr($this->refHost($ref), 0, 191),
             'visitor' => $this->visitorHash($ip, $ua),
             'device'  => $this->deviceOf($ua),
         ]);
+    }
+
+    // ── ইঞ্জিন-ভেদে SQL টুকরো ────────────────────────────────────────────
+
+    private function isPgsql(): bool
+    {
+        return DB::connection()->getDriverName() === 'pgsql';
+    }
+
+    /** শর্তসাপেক্ষ গণনা — pg: FILTER, mysql: SUM(CASE WHEN …) */
+    private function countIf(string $cond): string
+    {
+        return $this->isPgsql()
+            ? "count(*) FILTER (WHERE {$cond})"
+            : "SUM(CASE WHEN {$cond} THEN 1 ELSE 0 END)";
+    }
+
+    /** শর্তসাপেক্ষ unique গণনা */
+    private function countDistinctIf(string $col, string $cond): string
+    {
+        return $this->isPgsql()
+            ? "count(DISTINCT {$col}) FILTER (WHERE {$cond})"
+            : "COUNT(DISTINCT CASE WHEN {$cond} THEN {$col} END)";
+    }
+
+    /** শর্তসাপেক্ষ যোগফল (খালি হলে 0) */
+    private function sumIf(string $col, string $cond): string
+    {
+        return $this->isPgsql()
+            ? "COALESCE(sum({$col}) FILTER (WHERE {$cond}),0)"
+            : "COALESCE(SUM(CASE WHEN {$cond} THEN {$col} END),0)";
+    }
+
+    /** আজকের শুরু */
+    private function startOfToday(): string
+    {
+        return $this->isPgsql() ? "date_trunc('day', now())" : 'CURDATE()';
+    }
+
+    /** এখন থেকে ৫ মিনিট আগে (লাইভ ভিজিটর) */
+    private function fiveMinutesAgo(): string
+    {
+        return $this->isPgsql() ? "now() - interval '5 minutes'" : 'NOW() - INTERVAL 5 MINUTE';
+    }
+
+    /** চার্টের bucket লেবেল — day/week/month অনুযায়ী */
+    private function bucketExpr(string $unit): string
+    {
+        if ($this->isPgsql()) {
+            $fmt = $unit === 'month' ? 'YYYY-MM' : 'MM-DD';
+
+            return "to_char(date_trunc('{$unit}', created_at), '{$fmt}')";
+        }
+
+        return match ($unit) {
+            'month' => "DATE_FORMAT(created_at, '%Y-%m')",
+            // সপ্তাহের শুরুর দিন (সোমবার) — Postgres এর date_trunc('week') এর সমতুল্য
+            'week'  => "DATE_FORMAT(DATE_SUB(created_at, INTERVAL WEEKDAY(created_at) DAY), '%m-%d')",
+            default => "DATE_FORMAT(created_at, '%m-%d')",
+        };
     }
 
     /** রেঞ্জের দৈর্ঘ্য অনুযায়ী চার্টের bucket (day/week/month) */
@@ -54,53 +118,59 @@ class AnalyticsService
         $days = max(1, (int) round($from->diffInSeconds($to, absolute: true) / 86400));
 
         if ($days <= 45) {
-            return ['unit' => 'day', 'fmt' => 'MM-DD'];
+            return ['unit' => 'day'];
         }
         if ($days <= 210) {
-            return ['unit' => 'week', 'fmt' => 'MM-DD'];
+            return ['unit' => 'week'];
         }
 
-        return ['unit' => 'month', 'fmt' => 'YYYY-MM'];
+        return ['unit' => 'month'];
     }
+
+    // ── পরিসংখ্যান ───────────────────────────────────────────────────────
 
     /** অ্যাডমিন ড্যাশবোর্ডের জন্য সব ভিজিটর মেট্রিক */
     public function visitorStats(Carbon $from, Carbon $to): array
     {
-        ['unit' => $unit, 'fmt' => $fmt] = $this->pickBucket($from, $to);
+        ['unit' => $unit] = $this->pickBucket($from, $to);
+
+        $today  = $this->startOfToday();
+        $live   = $this->fiveMinutesAgo();
+        $inRange = 'created_at >= ? AND created_at <= ?';
 
         $t = DB::selectOne('
             SELECT
-              count(*) FILTER (WHERE created_at >= date_trunc(\'day\', now()))                   AS pv_today,
-              count(DISTINCT visitor) FILTER (WHERE created_at >= date_trunc(\'day\', now()))    AS uv_today,
-              count(DISTINCT visitor) FILTER (WHERE created_at >= now() - interval \'5 minutes\') AS live,
-              count(*) FILTER (WHERE created_at >= ? AND created_at <= ?)                        AS pv_range,
-              count(DISTINCT visitor) FILTER (WHERE created_at >= ? AND created_at <= ?)         AS uv_range
+              '.$this->countIf("created_at >= {$today}").'                  AS pv_today,
+              '.$this->countDistinctIf('visitor', "created_at >= {$today}").' AS uv_today,
+              '.$this->countDistinctIf('visitor', "created_at >= {$live}").'  AS live,
+              '.$this->countIf($inRange).'                                  AS pv_range,
+              '.$this->countDistinctIf('visitor', $inRange).'                AS uv_range
             FROM visits
         ', [$from, $to, $from, $to]);
 
-        $daily = DB::select('
-            SELECT to_char(date_trunc(?, created_at), ?) AS day,
-                   count(*)::int AS pv,
-                   count(DISTINCT visitor)::int AS uv
+        $bucket = $this->bucketExpr($unit);
+
+        $daily = DB::select("
+            SELECT {$bucket} AS day, count(*) AS pv, count(DISTINCT visitor) AS uv
             FROM visits
             WHERE created_at >= ? AND created_at <= ?
             GROUP BY 1 ORDER BY 1
-        ', [$unit, $fmt, $from, $to]);
+        ", [$from, $to]);
 
         $sources = DB::select('
-            SELECT ref AS source, count(*)::int AS n
+            SELECT ref AS source, count(*) AS n
             FROM visits WHERE created_at >= ? AND created_at <= ?
             GROUP BY ref ORDER BY n DESC LIMIT 6
         ', [$from, $to]);
 
         $topPages = DB::select('
-            SELECT path, count(*)::int AS n
+            SELECT path, count(*) AS n
             FROM visits WHERE created_at >= ? AND created_at <= ?
             GROUP BY path ORDER BY n DESC LIMIT 8
         ', [$from, $to]);
 
         $devices = DB::select('
-            SELECT device, count(*)::int AS n
+            SELECT device, count(*) AS n
             FROM visits WHERE created_at >= ? AND created_at <= ?
             GROUP BY device
         ', [$from, $to]);
@@ -111,47 +181,56 @@ class AnalyticsService
             'uvToday'  => (int) ($t->uv_today ?? 0),
             'pvRange'  => (int) ($t->pv_range ?? 0),
             'uvRange'  => (int) ($t->uv_range ?? 0),
-            'daily'    => array_map(fn ($r) => ['day' => $r->day, 'pv' => $r->pv, 'uv' => $r->uv], $daily),
-            'sources'  => array_map(fn ($r) => ['source' => $r->source, 'n' => $r->n], $sources),
-            'topPages' => array_map(fn ($r) => ['path' => $r->path, 'n' => $r->n], $topPages),
-            'devices'  => array_map(fn ($r) => ['device' => $r->device, 'n' => $r->n], $devices),
+            'daily'    => array_map(fn ($r) => ['day' => $r->day, 'pv' => (int) $r->pv, 'uv' => (int) $r->uv], $daily),
+            'sources'  => array_map(fn ($r) => ['source' => $r->source, 'n' => (int) $r->n], $sources),
+            'topPages' => array_map(fn ($r) => ['path' => $r->path, 'n' => (int) $r->n], $topPages),
+            'devices'  => array_map(fn ($r) => ['device' => $r->device, 'n' => (int) $r->n], $devices),
         ];
     }
 
     /** অর্ডার থেকে business metric */
     public function orderStats(Carbon $from, Carbon $to): array
     {
-        ['unit' => $unit, 'fmt' => $fmt] = $this->pickBucket($from, $to);
+        ['unit' => $unit] = $this->pickBucket($from, $to);
+
+        $today   = $this->startOfToday();
+        $inRange = 'created_at >= ? AND created_at <= ?';
+        $status  = fn (string $s) => "status = '{$s}' AND {$inRange}";
+
+        // প্যারামিটারের ক্রম নিচের SELECT এর ক্রমের সাথে মিলিয়ে রাখতে হবে
+        $params = [];
+        for ($i = 0; $i < 7; $i++) {
+            $params[] = $from;
+            $params[] = $to;
+        }
 
         $t = DB::selectOne('
             SELECT
-              count(*) FILTER (WHERE created_at >= date_trunc(\'day\', now()))                                AS orders_today,
-              count(*) FILTER (WHERE created_at >= ? AND created_at <= ?)                                     AS orders_range,
-              count(*)                                                                                        AS orders_total,
-              count(*) FILTER (WHERE status = \'pending\'         AND created_at >= ? AND created_at <= ?)     AS pending,
-              count(*) FILTER (WHERE status = \'confirmed\'       AND created_at >= ? AND created_at <= ?)     AS confirmed,
-              count(*) FILTER (WHERE status = \'sent_to_courier\' AND created_at >= ? AND created_at <= ?)     AS sent,
-              count(*) FILTER (WHERE status = \'delivered\'       AND created_at >= ? AND created_at <= ?)     AS delivered,
-              count(*) FILTER (WHERE status = \'cancelled\'       AND created_at >= ? AND created_at <= ?)     AS cancelled,
-              COALESCE(sum(total) FILTER (WHERE created_at >= date_trunc(\'day\', now())),0)                   AS rev_today,
-              COALESCE(sum(total) FILTER (WHERE created_at >= ? AND created_at <= ?),0)                        AS rev_range,
-              COALESCE(sum(total),0)                                                                           AS rev_total
+              '.$this->countIf("created_at >= {$today}").'          AS orders_today,
+              '.$this->countIf($inRange).'                          AS orders_range,
+              count(*)                                              AS orders_total,
+              '.$this->countIf($status('pending')).'                AS pending,
+              '.$this->countIf($status('confirmed')).'              AS confirmed,
+              '.$this->countIf($status('sent_to_courier')).'        AS sent,
+              '.$this->countIf($status('delivered')).'              AS delivered,
+              '.$this->countIf($status('cancelled')).'              AS cancelled,
+              '.$this->sumIf('total', "created_at >= {$today}").'   AS rev_today,
+              '.$this->sumIf('total', $inRange).'                   AS rev_range,
+              COALESCE(sum(total),0)                                AS rev_total
             FROM orders
-        ', [
-            $from, $to, $from, $to, $from, $to, $from, $to, $from, $to, $from, $to, $from, $to,
-        ]);
+        ', $params);
 
-        $daily = DB::select('
-            SELECT to_char(date_trunc(?, created_at), ?) AS day,
-                   count(*)::int AS orders,
-                   COALESCE(sum(total),0)::int AS rev
+        $bucket = $this->bucketExpr($unit);
+
+        $daily = DB::select("
+            SELECT {$bucket} AS day, count(*) AS orders, COALESCE(sum(total),0) AS rev
             FROM orders
             WHERE created_at >= ? AND created_at <= ?
             GROUP BY 1 ORDER BY 1
-        ', [$unit, $fmt, $from, $to]);
+        ", [$from, $to]);
 
         $top = DB::select('
-            SELECT product, count(*)::int AS n, COALESCE(sum(total),0)::int AS rev
+            SELECT product, count(*) AS n, COALESCE(sum(total),0) AS rev
             FROM orders
             WHERE created_at >= ? AND created_at <= ?
             GROUP BY product ORDER BY n DESC LIMIT 6
@@ -175,8 +254,8 @@ class AnalyticsService
                 'delivered' => (int) ($t->delivered ?? 0),
                 'cancelled' => (int) ($t->cancelled ?? 0),
             ],
-            'daily' => array_map(fn ($r) => ['day' => $r->day, 'orders' => $r->orders, 'rev' => $r->rev], $daily),
-            'top'   => array_map(fn ($r) => ['product' => $r->product, 'n' => $r->n, 'rev' => $r->rev], $top),
+            'daily' => array_map(fn ($r) => ['day' => $r->day, 'orders' => (int) $r->orders, 'rev' => (int) $r->rev], $daily),
+            'top'   => array_map(fn ($r) => ['product' => $r->product, 'n' => (int) $r->n, 'rev' => (int) $r->rev], $top),
         ];
     }
 }

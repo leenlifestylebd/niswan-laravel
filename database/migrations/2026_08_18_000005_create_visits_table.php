@@ -12,10 +12,10 @@ return new class extends Migration
         Schema::create('visits', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestampTz('created_at')->useCurrent();
-            $table->text('path')->nullable();
-            $table->text('ref')->nullable();      // referrer host: facebook/google/direct
-            $table->text('visitor')->nullable();  // sha256(ip|ua|APP_KEY) এর প্রথম ২৪ অক্ষর
-            $table->text('device')->nullable();   // mobile | desktop
+            $table->string('path', 191)->nullable();
+            $table->string('ref', 191)->nullable();     // referrer host: facebook/google/direct
+            $table->string('visitor', 24)->nullable();  // sha256(ip|ua|APP_KEY) এর প্রথম ২৪ অক্ষর
+            $table->string('device', 16)->nullable();   // mobile | desktop
 
             $table->index('created_at');
         });

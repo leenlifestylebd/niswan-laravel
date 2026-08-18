@@ -55,6 +55,9 @@ return [
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => env('DB_CHARSET', 'utf8mb4'),
             'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
+            // অ্যানালিটিক্সে NOW()/CURDATE() ব্যবহার হয়। DB সেশন UTC-তে না বাঁধলে
+            // সার্ভারের টাইমজোন অনুযায়ী "আজকের" হিসাব কয়েক ঘণ্টা এদিক-ওদিক হয়।
+            'timezone' => env('DB_TIMEZONE', '+00:00'),
             'prefix' => '',
             'prefix_indexes' => true,
             'strict' => true,

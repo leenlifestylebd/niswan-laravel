@@ -64,7 +64,8 @@ WhatsApp: ডেস্কটপে নিচের ডান কোণে ভা
 
 ## লোকাল সেটআপ
 
-দরকার: PHP 8.2+ (`pdo_pgsql`, `intl`, `openssl`, `zip`, `gd`), Composer, Node 20+, PostgreSQL।
+দরকার: PHP 8.2+ (`pdo_mysql` বা `pdo_pgsql`, `intl`, `openssl`, `zip`, `gd`), Composer, Node 20+,
+আর **MySQL/MariaDB অথবা PostgreSQL** — অ্যাপ দুটোতেই চলে।
 
 ```bash
 composer install
@@ -85,10 +86,10 @@ php artisan key:generate
 `.env` এ DB বসাও:
 
 ```
-DB_CONNECTION=pgsql
+DB_CONNECTION=mysql          # অথবা pgsql
 DB_HOST=127.0.0.1
-DB_PORT=5432
-DB_DATABASE=niswan_laravel
+DB_PORT=3306                 # pgsql হলে 5432
+DB_DATABASE=niswan
 DB_USERNAME=...
 DB_PASSWORD=...
 ADMIN_PASSWORD=admin123   # প্রথম লগইনের জন্য; পরে অ্যাডমিন → সেটিংস থেকে বদলাও
