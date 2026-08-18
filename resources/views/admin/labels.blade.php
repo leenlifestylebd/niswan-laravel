@@ -7,7 +7,7 @@
     <title>কুরিয়ার লেবেল — {{ $settings['brandName'] }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@400;500;600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css'])
     <style>
         /* ৫০×৭৫mm থার্মাল লেবেল */
@@ -23,7 +23,7 @@
         @media print { .label { border: none; } }
     </style>
 </head>
-<body class="bg-gray-100 font-[Hind_Siliguri]">
+<body class="bg-gray-100 ">
 
 <div class="no-print sticky top-0 flex flex-wrap items-center gap-3 border-b border-gray-200 bg-white px-4 py-3">
     <span class="text-sm text-gray-600">{{ bn_num($orders->count()) }}টি লেবেল — ৫০×৭৫mm</span>

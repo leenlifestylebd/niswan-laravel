@@ -56,10 +56,17 @@ class SettingsService
             // কুরিয়ার লেবেল
             'merchantName'    => '',
             'merchantId'      => '',
-            // থিম রঙ
-            'colorPrimary'    => '#5a1436',
+            // সিঙ্গেল-পেজ ল্যান্ডিং
+            'bannerUrl'          => '',  // হিরোর ফুল-ব্লিড ব্যানার (ডেস্কটপ)
+            'bannerMobileUrl'    => '',  // মোবাইল ব্যানার (খালি হলে ডেস্কটপেরটাই)
+            'bannerHeadline'     => '',  // খালি হলে ট্যাগলাইন
+            'bannerSubline'      => '',  // খালি হলে বর্ণনা
+            'landingProductSlug' => '',  // খালি হলে প্রথম active প্রোডাক্ট
+            // থিম রঙ (ডার্ক লাক্সারি)
+            'colorPrimary'    => '#5a1436',  // ব্র্যান্ড — সেকেন্ডারি অ্যাকসেন্ট
             'colorSecondary'  => '#7a2349',
-            'colorGlobal'     => '#2c1a22',
+            'colorGlobal'     => '#0b0a0a',  // পেজ ব্যাকগ্রাউন্ড (গাঢ়)
+            'colorAccent'     => '#c9a227',  // সোনালি — বাটন/হাইলাইট
         ];
     }
 
@@ -109,6 +116,13 @@ class SettingsService
             'colorPrimary'    => $get('colorPrimary'),
             'colorSecondary'  => $get('colorSecondary'),
             'colorGlobal'     => $get('colorGlobal'),
+            'colorAccent'     => $get('colorAccent'),
+            // সিঙ্গেল-পেজ ল্যান্ডিং
+            'bannerUrl'          => $map['bannerUrl'] ?? '',
+            'bannerMobileUrl'    => $map['bannerMobileUrl'] ?? '',
+            'bannerHeadline'     => $get('bannerHeadline') ?: $get('tagline'),
+            'bannerSubline'      => $get('bannerSubline') ?: $get('description'),
+            'landingProductSlug' => $map['landingProductSlug'] ?? '',
             'facebookPixelId' => $map['facebookPixelId'] ?? '',
             'capiTestCode'    => $map['capiTestCode'] ?? '',
             'merchantName'    => $map['merchantName'] ?? '',

@@ -40,6 +40,69 @@
         </label>
     </section>
 
+    {{-- সিঙ্গেল-পেজ ল্যান্ডিং --}}
+    <section class="grid gap-4 rounded-2xl border border-gray-200 bg-white p-5 md:grid-cols-2"
+        x-data="{ uploading: '', err: '',
+            async up(e, target) {
+                const file = (e.target.files || [])[0]; if (!file) return;
+                this.uploading = target; this.err = '';
+                try {
+                    const fd = new FormData(); fd.append('file', file); fd.append('prefix', 'banner');
+                    const res = await fetch('{{ route('admin.upload') }}', {
+                        method: 'POST',
+                        headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=\'csrf-token\']').content, 'Accept': 'application/json' },
+                        body: fd,
+                    });
+                    const json = await res.json();
+                    if (json.ok) document.querySelector('[name=\'' + target + '\']').value = json.url;
+                    else this.err = json.error || 'আপলোড ব্যর্থ';
+                } catch (err) { this.err = 'আপলোড ব্যর্থ'; }
+                this.uploading = ''; e.target.value = '';
+            } }">
+        <div class="md:col-span-2">
+            <h2 class="text-sm font-bold text-ink">ল্যান্ডিং পেজ (সিঙ্গেল প্রোডাক্ট)</h2>
+            <p class="mt-1 text-xs text-gray-500">
+                সাইটে একটাই পেজ, একটাই প্রোডাক্ট। হিরোতে নিচের ব্যানারটি ফুল-স্ক্রিন দেখায়।
+            </p>
+            <p x-show="err" x-cloak class="mt-1 text-xs text-red-500" x-text="err"></p>
+        </div>
+
+        <label class="text-sm font-semibold text-gray-700 md:col-span-2">যে প্রোডাক্টটি দেখাবে
+            <select name="landingProductSlug" class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-sm font-normal outline-none focus:border-brand">
+                <option value="">— প্রথম সক্রিয় প্রোডাক্ট (অটো) —</option>
+                @foreach ($activeProducts as $p)
+                    <option value="{{ $p->slug }}" @selected($s['landingProductSlug'] === $p->slug)>{{ $p->name }}</option>
+                @endforeach
+            </select>
+        </label>
+
+        <label class="text-sm font-semibold text-gray-700">ব্যানার — ডেস্কটপ
+            <input name="bannerUrl" value="{{ $s['bannerUrl'] }}" placeholder="খালি রাখলে প্রোডাক্টের মেইন ছবি"
+                   class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-sm font-normal outline-none focus:border-brand">
+            <input type="file" accept="image/*" @change="up($event, 'bannerUrl')"
+                   class="mt-2 w-full text-xs text-gray-600 file:mr-2 file:rounded-full file:border-0 file:bg-brand file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white">
+            <span x-show="uploading === 'bannerUrl'" x-cloak class="text-xs text-gray-500">আপলোড হচ্ছে...</span>
+        </label>
+
+        <label class="text-sm font-semibold text-gray-700">ব্যানার — মোবাইল (পোর্ট্রেট)
+            <input name="bannerMobileUrl" value="{{ $s['bannerMobileUrl'] }}" placeholder="খালি রাখলে ডেস্কটপেরটাই"
+                   class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-sm font-normal outline-none focus:border-brand">
+            <input type="file" accept="image/*" @change="up($event, 'bannerMobileUrl')"
+                   class="mt-2 w-full text-xs text-gray-600 file:mr-2 file:rounded-full file:border-0 file:bg-brand file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white">
+            <span x-show="uploading === 'bannerMobileUrl'" x-cloak class="text-xs text-gray-500">আপলোড হচ্ছে...</span>
+        </label>
+
+        <label class="text-sm font-semibold text-gray-700">হিরো হেডলাইন (খালি হলে ট্যাগলাইন)
+            <input name="bannerHeadline" value="{{ $s['bannerHeadline'] }}"
+                   class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-sm font-normal outline-none focus:border-brand">
+        </label>
+
+        <label class="text-sm font-semibold text-gray-700">হিরো সাবলাইন (খালি হলে বর্ণনা)
+            <input name="bannerSubline" value="{{ $s['bannerSubline'] }}"
+                   class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-sm font-normal outline-none focus:border-brand">
+        </label>
+    </section>
+
     {{-- যোগাযোগ --}}
     <section class="grid gap-4 rounded-2xl border border-gray-200 bg-white p-5 md:grid-cols-2">
         <h2 class="text-sm font-bold text-ink md:col-span-2">যোগাযোগ</h2>
@@ -69,14 +132,17 @@
             <input name="deliveryOutside" type="number" min="0" value="{{ $s['delivery']['outsideDhaka'] }}" class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-sm font-normal outline-none focus:border-brand">
         </label>
 
-        <label class="text-sm font-semibold text-gray-700">প্রাইমারি রঙ
+        <label class="text-sm font-semibold text-gray-700">অ্যাকসেন্ট রঙ (CTA/হাইলাইট — সোনালি)
+            <input name="colorAccent" type="color" value="{{ $s['colorAccent'] }}" class="mt-1 h-10 w-full rounded-xl border border-gray-200 px-1">
+        </label>
+        <label class="text-sm font-semibold text-gray-700">পেজ ব্যাকগ্রাউন্ড (গাঢ়)
+            <input name="colorGlobal" type="color" value="{{ $s['colorGlobal'] }}" class="mt-1 h-10 w-full rounded-xl border border-gray-200 px-1">
+        </label>
+        <label class="text-sm font-semibold text-gray-700">ব্র্যান্ড রঙ (অ্যাডমিন প্যানেল)
             <input name="colorPrimary" type="color" value="{{ $s['colorPrimary'] }}" class="mt-1 h-10 w-full rounded-xl border border-gray-200 px-1">
         </label>
-        <label class="text-sm font-semibold text-gray-700">সেকেন্ডারি রঙ (hover/গাঢ়)
+        <label class="text-sm font-semibold text-gray-700">ব্র্যান্ড রঙ — গাঢ় (hover)
             <input name="colorSecondary" type="color" value="{{ $s['colorSecondary'] }}" class="mt-1 h-10 w-full rounded-xl border border-gray-200 px-1">
-        </label>
-        <label class="text-sm font-semibold text-gray-700">গ্লোবাল রঙ (টেক্সট/ফুটার)
-            <input name="colorGlobal" type="color" value="{{ $s['colorGlobal'] }}" class="mt-1 h-10 w-full rounded-xl border border-gray-200 px-1">
         </label>
     </section>
 

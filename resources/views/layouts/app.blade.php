@@ -1,30 +1,31 @@
 <!DOCTYPE html>
-{{-- ক্লায়েন্টের বাছাই করা রঙ → CSS variable (পুরো সাইটে প্রযোজ্য) --}}
+{{-- অ্যাডমিন সেটিংসের রঙ → CSS variable (পুরো পেজে প্রযোজ্য) --}}
 <html lang="bn" class="h-full antialiased" style="
+    --color-bg: {{ $site['colorGlobal'] }};
+    --color-accent: {{ $site['colorAccent'] }};
     --color-brand: {{ $site['colorPrimary'] }};
-    --color-accent: {{ $site['colorPrimary'] }};
-    --color-brand-dark: {{ $site['colorSecondary'] }};
-    --color-ink: {{ $site['colorGlobal'] }};
-    --color-brand-light: {{ lighten($site['colorPrimary']) }};
+    --color-surface: {{ tint($site['colorGlobal'], 0.055) }};
+    --color-raised: {{ tint($site['colorGlobal'], 0.095) }};
+    --color-line: {{ tint($site['colorGlobal'], 0.16) }};
 ">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="{{ $site['colorPrimary'] }}">
+    <meta name="theme-color" content="{{ $site['colorGlobal'] }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>@yield('title', $site['brandName'].' — '.$site['tagline'])</title>
     <meta name="description" content="@yield('description', $site['description'])">
     <meta name="keywords" content="{{ implode(', ', $site['keywords']) }}">
     <meta name="application-name" content="{{ $site['brandName'] }}">
-    <link rel="canonical" href="@yield('canonical', url()->current())">
+    <link rel="canonical" href="{{ route('home') }}">
 
     <meta property="og:type" content="website">
     <meta property="og:locale" content="bn_BD">
     <meta property="og:site_name" content="{{ $site['brandName'] }}">
     <meta property="og:title" content="@yield('title', $site['brandName'].' — '.$site['tagline'])">
     <meta property="og:description" content="@yield('description', $site['description'])">
-    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:url" content="{{ route('home') }}">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="@yield('title', $site['brandName'].' — '.$site['tagline'])">
     <meta name="twitter:description" content="@yield('description', $site['description'])">
@@ -35,14 +36,15 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="{{ $site['brandName'] }}">
 
+    {{-- ডিসপ্লে সেরিফ (Tiro Bangla) + বডি (Anek Bangla) --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla:ital@0;1&family=Anek+Bangla:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('head')
 </head>
-<body class="min-h-full flex flex-col bg-white text-gray-800">
+<body class="min-h-full">
 
 @if ($site['facebookPixelId'])
     {{-- Meta Pixel (browser) — server CAPI-র সাথে একই event_id দিয়ে dedup হয় --}}

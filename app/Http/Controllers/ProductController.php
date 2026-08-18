@@ -2,18 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Product;
-use App\Models\Review;
-
+// সাইট এখন সিঙ্গেল-পেজ — পুরোনো /product/{slug} লিংক ভাঙে না, হোমে পাঠায়।
 class ProductController extends Controller
 {
     public function show(string $slug)
     {
-        $product = Product::where('slug', $slug)->where('active', true)->firstOrFail();
-
-        return view('product', [
-            'product'      => $product,
-            'reviewImages' => Review::ordered()->pluck('image_url')->all(),
-        ]);
+        return redirect()->route('home', [], 301);
     }
 }

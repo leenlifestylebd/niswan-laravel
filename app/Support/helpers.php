@@ -53,3 +53,27 @@ if (! function_exists('store_settings')) {
         return app(SettingsService::class)->public();
     }
 }
+
+if (! function_exists('tint')) {
+    /**
+     * গাঢ় ব্যাকগ্রাউন্ডের উপর হালকা স্তর — surface / raised / border রঙ বানাতে।
+     * $amt = কতটা সাদা মেশানো হবে (0–1)। ইনপুট খারাপ হলে ডিফল্ট গাঢ় রঙ ধরে।
+     */
+    function tint(?string $hex, float $amt = 0.06): string
+    {
+        $h = ltrim((string) $hex, '#');
+
+        if (strlen($h) !== 6 || ! ctype_xdigit($h)) {
+            $h = '0b0a0a';
+        }
+
+        $mix = fn (int $c) => (int) round($c + (255 - $c) * $amt);
+
+        return sprintf(
+            'rgb(%d, %d, %d)',
+            $mix((int) hexdec(substr($h, 0, 2))),
+            $mix((int) hexdec(substr($h, 2, 2))),
+            $mix((int) hexdec(substr($h, 4, 2)))
+        );
+    }
+}

@@ -6,54 +6,140 @@
 @source '../**/*.js';
 
 @theme {
-  /* ব্র্যান্ড রঙ — অ্যাডমিন সেটিংস থেকে <html> এ inline var দিয়ে ওভাররাইড হয় */
-  --color-brand: #e23a7a;        /* মূল */
-  --color-brand-dark: #be185d;   /* গাঢ় */
-  --color-brand-light: #fce7f1;  /* হালকা */
-  --color-ink: #111111;          /* টেক্সট/হেডার/ফুটার */
-  --color-ink-soft: #2a2a2a;
-  --color-accent: #e23a7a;
-  --font-bangla: 'Hind Siliguri', 'Segoe UI', system-ui, sans-serif;
-}
+  /* ── ডার্ক লাক্সারি প্যালেট ──────────────────────────────────────────
+     এই মানগুলো <html> এ inline CSS variable দিয়ে অ্যাডমিন সেটিংস থেকে ওভাররাইড হয় */
+  --color-bg:      #0b0a0a;   /* পেজ ব্যাকগ্রাউন্ড — প্রায় কালো */
+  --color-surface: #151112;   /* কার্ড/প্যানেল */
+  --color-raised:  #1e1819;   /* ইনপুট/হোভার */
+  --color-line:    #2e2627;   /* বর্ডার */
+  --color-fg:      #f3ede5;   /* মূল টেক্সট — উষ্ণ অফ-হোয়াইট */
+  --color-muted:   #9c9089;   /* সেকেন্ডারি টেক্সট */
+  --color-accent:  #c9a227;   /* সোনালি — CTA, হাইলাইট */
+  --color-brand:   #5a1436;   /* ব্র্যান্ড মেরুন — সেকেন্ডারি অ্যাকসেন্ট */
 
-:root {
-  --background: #ffffff;
-  --foreground: #1a1a1a;
-}
+  /* অ্যাডমিন প্যানেল হালকা থিমেই থাকে — এই টোকেনগুলো সেখানে ব্যবহার হয় */
+  --color-ink:         #1a1416;
+  --color-brand-dark:  #7a2349;
+  --color-brand-light: #f6ecf1;
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-bangla);
+  /* ── ফন্ট ──────────────────────────────────────────────────────────
+     ডিসপ্লে সেরিফ + জিওমেট্রিক বডি (আগের Hind Siliguri নয়) */
+  --font-display: 'Tiro Bangla', Georgia, serif;
+  --font-body:    'Anek Bangla', 'Segoe UI', system-ui, sans-serif;
 }
 
 html {
   scroll-behavior: smooth;
+  background: var(--color-bg);
 }
 
-/* একটানা right-to-left মার্কি স্লাইডার */
-@keyframes store-marquee {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-body);
 }
-.marquee-track {
-  animation: store-marquee 35s linear infinite;
+
+h1, h2, h3, .font-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.01em;
 }
-@media (hover: hover) {
-  .marquee-track:hover { animation-play-state: paused; }
+
+/* সেকশনের ছোট সব-ক্যাপস লেবেল */
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+/* সোনালি পাতলা রুল — সেকশন বিভাজক */
+.rule-gold {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+  opacity: 0.55;
 }
 
 /* Alpine লোড হওয়ার আগে x-cloak এলিমেন্ট লুকানো থাকে */
 [x-cloak] { display: none !important; }
 
-/* স্ক্রলবার লুকানো (রিভিউ স্লাইডার) */
+/* স্ক্রলবার লুকানো (রিভিউ/গ্যালারি স্লাইডার) */
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* একটানা right-to-left মার্কি (ঘোষণা বার) */
+@keyframes niswan-marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.marquee-track { animation: niswan-marquee 30s linear infinite; }
+@media (hover: hover) {
+  .marquee-track:hover { animation-play-state: paused; }
+}
+
+/* স্ক্রলে সেকশন ফেড-ইন */
+@keyframes niswan-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: none; }
+}
+.rise { animation: niswan-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rise, .marquee-track { animation: none; }
+  html { scroll-behavior: auto; }
+}
+
+/* ইনপুট — ডার্ক, ধারালো কোণা, ফোকাসে সোনালি বর্ডার */
+.field {
+  width: 100%;
+  background: var(--color-raised);
+  border: 1px solid var(--color-line);
+  color: var(--color-fg);
+  padding: 0.7rem 0.9rem;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+.field::placeholder { color: color-mix(in srgb, var(--color-muted) 80%, transparent); }
+.field:focus { border-color: var(--color-accent); }
+
+/* প্রধান CTA — সোনালি ব্লক, ধারালো কোণা */
+.btn-gold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--color-accent);
+  color: #17120a;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 0.95rem 2rem;
+  border: 1px solid var(--color-accent);
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.btn-gold:hover { background: transparent; color: var(--color-accent); }
+.btn-gold:disabled { opacity: 0.55; }
+
+/* সেকেন্ডারি — আউটলাইন */
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid var(--color-line);
+  color: var(--color-fg);
+  padding: 0.95rem 2rem;
+  font-weight: 600;
+  transition: border-color 0.18s ease, color 0.18s ease;
+}
+.btn-outline:hover { border-color: var(--color-accent); color: var(--color-accent); }
 
 /* কুরিয়ার লেবেল প্রিন্ট — ৫০×৭৫mm */
 @media print {
   @page { size: 50mm 75mm; margin: 0; }
-  html, body { width: 50mm; background: #fff; }
+  html, body { width: 50mm; background: #fff; color: #000; }
   .no-print { display: none !important; }
   .label-sheet { display: block; }
   .label { width: 50mm; height: 75mm; page-break-after: always; break-after: page; }
