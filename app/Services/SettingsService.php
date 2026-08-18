@@ -148,16 +148,15 @@ class SettingsService
             return (string) $raw;
         }
 
-        $env = self::ENV_FALLBACK[$name] ?? null;
-
-        return $env ? (string) env($env, '') : '';
+        // ⚠️ env() নয় — config:cache করা থাকলে env() null দেয়
+        return (string) config('store.integration_env.'.$name, '');
     }
 
     /** অ্যাডমিনের জন্য: পাবলিক মান + সিক্রেট সেট আছে কিনা (মান নয়) */
     public function forAdmin(): array
     {
         $map   = $this->map();
-        $isSet = fn (string $k) => (bool) ($map[$k] ?? '') || (bool) env(self::ENV_FALLBACK[$k] ?? '', '');
+        $isSet = fn (string $k) => (bool) ($map[$k] ?? '') || (bool) config('store.integration_env.'.$k, '');
 
         return array_merge($this->public(), [
             'telegramChatId' => $map['telegramChatId'] ?? '',

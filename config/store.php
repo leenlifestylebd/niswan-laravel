@@ -45,4 +45,25 @@ return [
 
     // আপলোড ডিরেক্টরি — VPS-এ persistent volume mount করতে হবে
     'upload_dir' => env('UPLOAD_DIR') ?: storage_path('app/uploads'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | .env থেকে পড়া মান
+    |--------------------------------------------------------------------------
+    | ⚠️ `php artisan config:cache` চালালে Laravel আর .env ফাইল লোড করে না।
+    | তখন কনফিগ ফাইলের বাইরে env() ডাকলে সবসময় null আসে। তাই .env এর মানগুলো
+    | এখানেই পড়তে হবে, আর কোডে config() দিয়ে ব্যবহার করতে হবে।
+    */
+
+    // অ্যাডমিনের প্রথম লগইনের পাসওয়ার্ড (DB-তে হ্যাশ সেট না থাকলে)
+    'admin_password' => env('ADMIN_PASSWORD', ''),
+
+    // ইন্টিগ্রেশন টোকেনের env fallback — সাধারণত অ্যাডমিন সেটিংস থেকেই আসে
+    'integration_env' => [
+        'telegramBotToken'   => env('TELEGRAM_BOT_TOKEN', ''),
+        'telegramChatId'     => env('TELEGRAM_CHAT_ID', ''),
+        'steadfastApiKey'    => env('STEADFAST_API_KEY', ''),
+        'steadfastSecretKey' => env('STEADFAST_SECRET_KEY', ''),
+        'capiAccessToken'    => env('FB_CAPI_TOKEN', ''),
+    ],
 ];

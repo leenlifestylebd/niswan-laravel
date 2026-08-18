@@ -32,8 +32,9 @@ class AdminAuthService
             return Hash::check($input, $hash);
         }
 
-        // DB-তে সেট না থাকলে env fallback (প্রথম লগইনের জন্য)
-        $envPassword = (string) env('ADMIN_PASSWORD', '');
+        // DB-তে সেট না থাকলে .env fallback (প্রথম লগইনের জন্য)।
+        // ⚠️ env() নয় — config:cache করা থাকলে env() null দেয়, তখন লগইনই আটকে যায়।
+        $envPassword = (string) config('store.admin_password', '');
 
         return $envPassword !== '' && hash_equals($envPassword, $input);
     }
