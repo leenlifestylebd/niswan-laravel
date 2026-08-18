@@ -15,12 +15,8 @@
             @endif
         </a>
 
-        {{-- লিংক --}}
+        {{-- যোগাযোগ --}}
         <nav class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[color:var(--color-muted)]">
-            <a href="#detail" class="transition hover:text-[color:var(--color-accent)]">প্রোডাক্ট</a>
-            <a href="#reviews" class="transition hover:text-[color:var(--color-accent)]">রিভিউ</a>
-            <a href="#order" class="transition hover:text-[color:var(--color-accent)]">অর্ডার</a>
-            <span class="text-[color:var(--color-accent)]">◆</span>
             <a href="tel:{{ $site['phone'] }}" class="transition hover:text-[color:var(--color-accent)]">{{ $site['phone'] }}</a>
             <a href="https://wa.me/{{ $site['whatsapp'] }}?text={{ $msg }}" target="_blank" rel="noopener noreferrer"
                class="transition hover:text-[color:var(--color-accent)]">WhatsApp</a>
