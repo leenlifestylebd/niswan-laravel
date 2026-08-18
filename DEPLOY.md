@@ -1,10 +1,15 @@
-# ডেপ্লয় গাইড — Hostinger Premium (শেয়ার্ড হোস্টিং)
+# ডেপ্লয় গাইড — niswan.store · Hostinger Premium
 
 অ্যাপটা **MySQL/MariaDB ও PostgreSQL দুটোতেই চলে**, তাই Hostinger-এর MySQL দিয়েই
 সব কাজ করবে — বাইরের কোনো ডেটাবেজ সার্ভিস লাগবে না।
 
-আপনার WordPress সাইট আগের মতোই চলবে; এটা একটা **আলাদা সাবডোমেইনে** বসবে
-(যেমন `shop.leen.com.bd`)।
+আপনার WordPress সাইট আগের মতোই চলবে; এই দোকানটা বসবে আলাদা ডোমেইন
+**`niswan.store`** এ।
+
+> ⚠️ **`niswan.store` এখন Cloudflare-এ আছে** (nameserver `otto/liz.ns.cloudflare.com`)
+> আর proxy (কমলা মেঘ) চালু, কিন্তু পেছনে কোনো সার্ভার নেই — এখন খুললে
+> **error 522** দেখায়। তাই DNS ও SSL-এর ধাপগুলো (ধাপ ২ ও ৯) **ক্রম মেনে**
+> করতে হবে, নাহলে SSL ইস্যু হবে না বা রিডাইরেক্ট লুপে পড়বে।
 
 > **কিউ ওয়ার্কার বা ক্রন জব লাগে না** — অ্যাপে কোনো queued job বা scheduled task নেই।
 
@@ -35,11 +40,39 @@ Character set যেন **utf8mb4** হয় (বাংলা লেখার �
 
 ---
 
-## ২. সাবডোমেইন বানান
+## ২. ডোমেইন যোগ করুন + Cloudflare DNS ঘোরান
 
-hPanel → Domains → **Subdomains** → `shop` যোগ করুন।
+### ২ক. Hostinger-এ ডোমেইন যোগ
 
-Hostinger এটার জন্য ফোল্ডার বানাবে: `~/domains/shop.leen.com.bd/public_html`
+hPanel → **Websites → Add Website** (বা Domains → **Add Domain**) → `niswan.store`
+
+Hostinger ফোল্ডার বানাবে: `~/domains/niswan.store/public_html`
+আর একটা **সার্ভার IP** দেখাবে — সেটা কপি করুন (hPanel → Websites → Dashboard →
+**Server IP address**)।
+
+### ২খ. Cloudflare-এ A রেকর্ড বদলান
+
+Cloudflare ড্যাশবোর্ড → `niswan.store` → **DNS → Records**:
+
+| Type | Name | Content | Proxy |
+|---|---|---|---|
+| A | `@` | `<Hostinger সার্ভার IP>` | **DNS only (ধূসর মেঘ)** — আপাতত |
+| A | `www` | `<একই IP>` | **DNS only (ধূসর মেঘ)** — আপাতত |
+
+> 🔸 **এখন অবশ্যই ধূসর মেঘ (DNS only) রাখুন।** কমলা মেঘ চালু থাকলে Let's Encrypt
+> ডোমেইন যাচাই করতে পারে না, SSL ইস্যু হবে না। SSL হয়ে যাওয়ার পর ধাপ ৯-এ আবার
+> কমলা করবেন।
+
+Cloudflare-এ এখন একটা **redirect rule** আছে যেটা `niswan.store` → `www.niswan.store`
+পাঠায়। কোনটা মূল ঠিকানা হবে ঠিক করে নিন (`www` ছাড়া রাখাই সহজ) — **Rules →
+Redirect Rules** থেকে নিয়মটা বদলান বা মুছে দিন। যেটা বেছে নেবেন সেটাই `.env` এর
+`APP_URL` এ বসবে।
+
+DNS ছড়াতে ৫–৩০ মিনিট লাগতে পারে। যাচাই:
+
+```bash
+nslookup niswan.store 8.8.8.8
+```
 
 ---
 
@@ -52,13 +85,13 @@ ssh -p <port> u123456@<host>
 ```
 
 ```bash
-cd ~/domains/shop.leen.com.bd && git clone https://github.com/leenlifestylebd/niswan-laravel.git app
+cd ~/domains/niswan.store && git clone https://github.com/leenlifestylebd/niswan-laravel.git app
 ```
 
 এখন গঠনটা এমন:
 
 ```
-~/domains/shop.leen.com.bd/
+~/domains/niswan.store/
 ├── app/            ← Laravel কোড (ওয়েব থেকে দেখা যাবে না)
 └── public_html/    ← এটা app/public এর দিকে দেখাবে (পরের ধাপ)
 ```
@@ -66,10 +99,10 @@ cd ~/domains/shop.leen.com.bd && git clone https://github.com/leenlifestylebd/ni
 ### public_html কে app/public এর দিকে পাঠান
 
 ```bash
-cd ~/domains/shop.leen.com.bd && rm -rf public_html && ln -s app/public public_html
+cd ~/domains/niswan.store && rm -rf public_html && ln -s app/public public_html
 ```
 
-> `public_html` মুছে ফেলার আগে দেখে নিন ভেতরে দরকারি কিছু নেই (নতুন সাবডোমেইনে
+> `public_html` মুছে ফেলার আগে দেখে নিন ভেতরে দরকারি কিছু নেই (নতুন ডোমেইনে
 > শুধু Hostinger-এর ডিফল্ট পেজ থাকে)।
 
 symlink কাজ না করলে বিকল্প: `app/public` এর সব ফাইল `public_html` এ কপি করে
@@ -80,7 +113,7 @@ symlink কাজ না করলে বিকল্প: `app/public` এর �
 ## ৪. নির্ভরতা ইনস্টল
 
 ```bash
-cd ~/domains/shop.leen.com.bd/app && composer install --no-dev --optimize-autoloader
+cd ~/domains/niswan.store/app && composer install --no-dev --optimize-autoloader
 ```
 
 Composer না পেলে:
@@ -100,7 +133,7 @@ npm run build
 ```
 
 তারপর তৈরি হওয়া `public/build/` ফোল্ডারটা সার্ভারের
-`~/domains/shop.leen.com.bd/app/public/build/` এ আপলোড করুন
+`~/domains/niswan.store/app/public/build/` এ আপলোড করুন
 (hPanel → File Manager, অথবা FileZilla/SFTP)।
 
 > ⚠️ `public/build` গিটে যায় না — **ডিজাইন বা CSS বদলালে প্রতিবার আবার আপলোড করতে হবে**,
@@ -111,7 +144,7 @@ npm run build
 ## ৬. `.env` তৈরি
 
 ```bash
-cd ~/domains/shop.leen.com.bd/app && cp .env.example .env && php artisan key:generate
+cd ~/domains/niswan.store/app && cp .env.example .env && php artisan key:generate
 ```
 
 `nano .env` দিয়ে এডিট করুন:
@@ -120,7 +153,7 @@ cd ~/domains/shop.leen.com.bd/app && cp .env.example .env && php artisan key:gen
 APP_NAME=NISWAN
 APP_ENV=production
 APP_DEBUG=false
-APP_URL=https://shop.leen.com.bd
+APP_URL=https://niswan.store
 
 DB_CONNECTION=mysql
 DB_HOST=localhost
@@ -130,7 +163,7 @@ DB_USERNAME=u123456_niswan
 DB_PASSWORD=<আপনার পাসওয়ার্ড>
 
 ADMIN_PASSWORD=<প্রথম লগইনের পাসওয়ার্ড>
-UPLOAD_DIR=/home/u123456/domains/shop.leen.com.bd/app/storage/uploads
+UPLOAD_DIR=/home/u123456/domains/niswan.store/app/storage/uploads
 ```
 
 > 🔑 **`APP_KEY` আলাদা করে সেভ করে রাখুন।** Steadfast / Telegram / Meta-র টোকেন
@@ -159,16 +192,32 @@ php artisan config:cache && php artisan route:cache && php artisan view:cache
 
 ---
 
-## ৯. HTTPS
+## ৯. HTTPS (ক্রম মেনে করুন)
 
-hPanel → Security → **SSL** → সাবডোমেইনের জন্য Let's Encrypt চালু করুন,
-তারপর **Force HTTPS** অন করুন।
+**৯ক.** Cloudflare-এ দুটো A রেকর্ডই তখনো **DNS only (ধূসর মেঘ)** আছে কি না দেখে নিন।
+
+**৯খ.** hPanel → Security → **SSL** → `niswan.store` এর জন্য Let's Encrypt ইনস্টল
+করুন। ইস্যু হতে কয়েক মিনিট লাগে। হয়ে গেলে যাচাই করুন:
+
+```bash
+curl -sI https://niswan.store | head -3
+```
+
+**৯গ.** SSL ঠিকমতো কাজ করলে Cloudflare-এ ফিরে গিয়ে দুটো রেকর্ডই **Proxied
+(কমলা মেঘ)** করে দিন।
+
+**৯ঘ.** Cloudflare → **SSL/TLS → Overview** → মোড **Full (strict)** করুন।
+
+> ⚠️ মোড **Flexible** রাখলে অসীম রিডাইরেক্ট লুপ হবে (Cloudflare HTTP-এ পাঠাবে,
+> Hostinger আবার HTTPS-এ ঠেলবে)। Full (strict) ছাড়া অন্য কিছু দেবেন না।
+
+**৯ঙ.** সবশেষে hPanel-এ **Force HTTPS** অন করুন।
 
 ---
 
 ## ১০. ডেপ্লয়ের পরে — চেকলিস্ট
 
-1. `https://shop.leen.com.bd/admin` এ `.env` এর `ADMIN_PASSWORD` দিয়ে লগইন
+1. `https://niswan.store/admin` এ `.env` এর `ADMIN_PASSWORD` দিয়ে লগইন
 2. **সেটিংস → অ্যাডমিন পাসওয়ার্ড** — এখনই বদলান
 3. **সেটিংস → ল্যান্ডিং পেজ** — ব্যানার আপলোড (ডেস্কটপ + মোবাইল আলাদা),
    হিরো হেডলাইন/সাবলাইন, কোন প্রোডাক্টটা দেখাবে
@@ -194,7 +243,7 @@ php artisan tinker --execute="App\Models\Visit::truncate(); App\Models\Order::tr
 ## পরে আপডেট করতে
 
 ```bash
-cd ~/domains/shop.leen.com.bd/app && git pull && composer install --no-dev -o && php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache
+cd ~/domains/niswan.store/app && git pull && composer install --no-dev -o && php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache
 ```
 
 ডিজাইন/CSS বদলালে লোকালি `npm run build` চালিয়ে `public/build/` আবার আপলোড করুন (ধাপ ৫)।
@@ -214,6 +263,10 @@ cd ~/domains/shop.leen.com.bd/app && git pull && composer install --no-dev -o &&
 | ৪০৪ — index.php খুঁজে পাচ্ছে না | `public_html` symlink ঠিকমতো `app/public` এ যায়নি (ধাপ ৩) |
 | পুরোনো কনফিগ ধরে আছে | `php artisan config:clear && php artisan config:cache` |
 | বাংলা লেখা `???` দেখাচ্ছে | ডেটাবেজের charset **utf8mb4** নয় |
+| **Cloudflare error 522** | A রেকর্ড Hostinger-এর IP তে যায়নি, অথবা ডোমেইনটা hPanel-এ যোগ করা হয়নি |
+| **অসীম রিডাইরেক্ট (ERR_TOO_MANY_REDIRECTS)** | Cloudflare SSL/TLS মোড **Flexible** — **Full (strict)** করুন (ধাপ ৯ঘ) |
+| SSL ইস্যু হচ্ছে না | Cloudflare proxy (কমলা মেঘ) চালু আছে — ধূসর করে আবার চেষ্টা করুন (ধাপ ৯ক) |
+| `www` আর মূল ডোমেইন আলাদা আচরণ করছে | Cloudflare-এর পুরোনো redirect rule রয়ে গেছে (ধাপ ২খ) |
 
 ---
 
