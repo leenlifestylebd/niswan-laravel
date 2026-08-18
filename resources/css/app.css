@@ -1,0 +1,60 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+  /* ব্র্যান্ড রঙ — অ্যাডমিন সেটিংস থেকে <html> এ inline var দিয়ে ওভাররাইড হয় */
+  --color-brand: #e23a7a;        /* মূল */
+  --color-brand-dark: #be185d;   /* গাঢ় */
+  --color-brand-light: #fce7f1;  /* হালকা */
+  --color-ink: #111111;          /* টেক্সট/হেডার/ফুটার */
+  --color-ink-soft: #2a2a2a;
+  --color-accent: #e23a7a;
+  --font-bangla: 'Hind Siliguri', 'Segoe UI', system-ui, sans-serif;
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #1a1a1a;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-bangla);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* একটানা right-to-left মার্কি স্লাইডার */
+@keyframes store-marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.marquee-track {
+  animation: store-marquee 35s linear infinite;
+}
+@media (hover: hover) {
+  .marquee-track:hover { animation-play-state: paused; }
+}
+
+/* Alpine লোড হওয়ার আগে x-cloak এলিমেন্ট লুকানো থাকে */
+[x-cloak] { display: none !important; }
+
+/* স্ক্রলবার লুকানো (রিভিউ স্লাইডার) */
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* কুরিয়ার লেবেল প্রিন্ট — ৫০×৭৫mm */
+@media print {
+  @page { size: 50mm 75mm; margin: 0; }
+  html, body { width: 50mm; background: #fff; }
+  .no-print { display: none !important; }
+  .label-sheet { display: block; }
+  .label { width: 50mm; height: 75mm; page-break-after: always; break-after: page; }
+}

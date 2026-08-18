@@ -1,0 +1,28 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        // প্রাইভেসি-বান্ধব ভিজিট লগ — কোনো PII নেই, visitor একমুখী হ্যাশ
+        Schema::create('visits', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->timestampTz('created_at')->useCurrent();
+            $table->text('path')->nullable();
+            $table->text('ref')->nullable();      // referrer host: facebook/google/direct
+            $table->text('visitor')->nullable();  // sha256(ip|ua|APP_KEY) এর প্রথম ২৪ অক্ষর
+            $table->text('device')->nullable();   // mobile | desktop
+
+            $table->index('created_at');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('visits');
+    }
+};

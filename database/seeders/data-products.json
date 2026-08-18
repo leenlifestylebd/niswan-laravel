@@ -1,0 +1,192 @@
+[
+  {
+    "slug": "annisa-elite",
+    "name": "আন্নিসা এলিট",
+    "price": 2700,
+    "oldPrice": 3200,
+    "badge": "এলিট",
+    "image": "/products/annisa-1.jpg",
+    "images": [
+      "/products/annisa-1.jpg",
+      "/products/annisa-2.jpg",
+      "/products/annisa-3.jpg",
+      "/products/annisa-4.jpg",
+      "/products/annisa-5.jpg"
+    ],
+    "short": "এলিট হিজাব সেট — প্রিমিয়াম ফিনিশিং",
+    "sizes": [
+      "ফ্রি সাইজ",
+      "৫২",
+      "৫৪",
+      "৫৬"
+    ],
+    "variants": [
+      {
+        "name": "হিজাব-নিকাব",
+        "price": 2000
+      },
+      {
+        "name": "ফুল সেট",
+        "price": 2700
+      }
+    ],
+    "features": [
+      "প্রিমিয়াম মানের কাপড়",
+      "এলিগ্যান্ট এলিট ডিজাইন",
+      "ফুল কভারেজ পর্দা",
+      "আরামদায়ক ও টেকসই"
+    ]
+  },
+  {
+    "slug": "haya-classic",
+    "name": "হায়া ক্লাসিক",
+    "price": 3200,
+    "oldPrice": 3800,
+    "badge": "বেস্ট সেলার",
+    "image": "/products/haya-1.jpg",
+    "images": [
+      "/products/haya-1.jpg",
+      "/products/haya-2.jpg",
+      "/products/haya-3.jpg",
+      "/products/haya-4.jpg",
+      "/products/haya-5.jpg"
+    ],
+    "short": "ক্লাসিক হিজাব সেট — সময়হীন সৌন্দর্য",
+    "sizes": [
+      "ফ্রি সাইজ",
+      "৫২",
+      "৫৪",
+      "৫৬"
+    ],
+    "variants": [
+      {
+        "name": "হিজাব-নিকাব",
+        "price": 2400
+      },
+      {
+        "name": "ফুল সেট",
+        "price": 3200
+      }
+    ],
+    "features": [
+      "ক্লাসিক ও এলিগ্যান্ট লুক",
+      "নরম, আরামদায়ক ফেব্রিক",
+      "নিখুঁত সেলাই",
+      "সব অনুষ্ঠানে মানানসই"
+    ]
+  },
+  {
+    "slug": "noor-luxe",
+    "name": "নূর লাক্স",
+    "price": 2850,
+    "oldPrice": 3300,
+    "badge": "লাক্স",
+    "image": "/products/noor-1.jpg",
+    "images": [
+      "/products/noor-1.jpg",
+      "/products/noor-2.jpg",
+      "/products/noor-3.jpg",
+      "/products/noor-4.jpg",
+      "/products/noor-5.jpg"
+    ],
+    "short": "লাক্স হিজাব সেট — বিলাসবহুল কাপড়",
+    "sizes": [
+      "ফ্রি সাইজ",
+      "৫২",
+      "৫৪",
+      "৫৬"
+    ],
+    "variants": [
+      {
+        "name": "হিজাব-নিকাব",
+        "price": 2150
+      },
+      {
+        "name": "ফুল সেট",
+        "price": 2850
+      }
+    ],
+    "features": [
+      "লাক্সারি প্রিমিয়াম ফেব্রিক",
+      "রিচ ও এলিগ্যান্ট ফিনিশ",
+      "ফুল কভারেজ পর্দা",
+      "লং লাস্টিং কোয়ালিটি"
+    ]
+  },
+  {
+    "slug": "taqwa-luxe",
+    "name": "তাকওয়া লাক্স",
+    "price": 2550,
+    "oldPrice": 3000,
+    "badge": "নতুন",
+    "image": "/products/taqwa-1.jpg",
+    "images": [
+      "/products/taqwa-1.jpg",
+      "/products/taqwa-2.jpg",
+      "/products/taqwa-3.jpg",
+      "/products/taqwa-4.jpg",
+      "/products/taqwa-5.jpg"
+    ],
+    "short": "লাক্স হিজাব সেট — পরিপূর্ণ পর্দা",
+    "sizes": [
+      "ফ্রি সাইজ",
+      "৫২",
+      "৫৪",
+      "৫৬"
+    ],
+    "variants": [
+      {
+        "name": "হিজাব-নিকাব",
+        "price": 1900
+      },
+      {
+        "name": "ফুল সেট",
+        "price": 2550
+      }
+    ],
+    "features": [
+      "প্রিমিয়াম মানের কাপড়",
+      "পরিপূর্ণ পর্দার ডিজাইন",
+      "আরামদায়ক ও হালকা",
+      "ডেইলি ব্যবহারের জন্য আদর্শ"
+    ]
+  },
+  {
+    "slug": "zahra-modest",
+    "name": "জাহরা মডেস্ট",
+    "price": 2500,
+    "oldPrice": 2950,
+    "badge": "জনপ্রিয়",
+    "image": "/products/zahra-1.jpg",
+    "images": [
+      "/products/zahra-1.jpg",
+      "/products/zahra-2.jpg",
+      "/products/zahra-3.jpg",
+      "/products/zahra-4.jpg",
+      "/products/zahra-5.jpg"
+    ],
+    "short": "মডেস্ট হিজাব সেট — সাশ্রয়ী ও সুন্দর",
+    "sizes": [
+      "ফ্রি সাইজ",
+      "৫২",
+      "৫৪",
+      "৫৬"
+    ],
+    "variants": [
+      {
+        "name": "হিজাব-নিকাব",
+        "price": 1850
+      },
+      {
+        "name": "ফুল সেট",
+        "price": 2500
+      }
+    ],
+    "features": [
+      "সুন্দর মডেস্ট ডিজাইন",
+      "আরামদায়ক কাপড়",
+      "সাশ্রয়ী দামে প্রিমিয়াম মান",
+      "নিখুঁত পর্দা"
+    ]
+  }
+]
