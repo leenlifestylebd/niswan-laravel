@@ -2,8 +2,8 @@
 <section class="border-y border-[color:var(--color-line)] bg-[color:var(--color-surface)]">
     <div class="mx-auto max-w-6xl px-6 py-12 sm:px-10 sm:py-16">
         <div class="mb-9 text-center">
-            <p class="eyebrow">আমাদের প্রতিশ্রুতি</p>
-            <h2 class="mt-3 text-2xl sm:text-3xl">কেন {{ $site['brandName'] }}</h2>
+            <p class="eyebrow reveal">আমাদের প্রতিশ্রুতি</p>
+            <h2 class="reveal reveal-1 mt-3 text-2xl sm:text-3xl">কেন {{ $site['brandName'] }}</h2>
         </div>
 
         <div class="grid grid-cols-2 gap-x-6 gap-y-7 sm:gap-x-10 lg:grid-cols-4">

@@ -38,12 +38,12 @@
 
         {{-- বিবরণ --}}
         <div class="flex flex-col justify-center">
-            <p class="eyebrow">প্রোডাক্ট</p>
-            <h2 class="mt-4 text-4xl leading-tight sm:text-5xl">{{ $product->name }}</h2>
+            <p class="eyebrow reveal">প্রোডাক্ট</p>
+            <h2 class="reveal reveal-1 mt-4 text-4xl leading-tight sm:text-5xl">{{ $product->name }}</h2>
 
-            <div class="rule-gold mt-6 max-w-[160px]"></div>
+            <div class="rule-gold reveal reveal-2 mt-6 max-w-[160px]"></div>
 
-            <p class="mt-6 text-base leading-relaxed text-[color:var(--color-muted)]">{{ $product->short }}</p>
+            <p class="reveal reveal-2 mt-6 text-base leading-relaxed text-[color:var(--color-muted)]">{{ $product->short }}</p>
 
             <div class="mt-8 flex flex-wrap items-baseline gap-4">
                 <span class="font-display text-4xl text-[color:var(--color-accent)]">{{ bdt($product->price) }}</span>

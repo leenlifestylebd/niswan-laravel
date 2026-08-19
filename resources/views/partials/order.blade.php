@@ -37,10 +37,10 @@
 
         <div x-show="status !== 'success'">
             <div class="mb-12 text-center">
-                <p class="eyebrow">অর্ডার</p>
-                <h2 class="mt-4 text-4xl sm:text-5xl">ফর্মটি পূরণ করুন</h2>
-                <div class="rule-gold mx-auto mt-6 max-w-[180px]"></div>
-                <p class="mt-5 text-sm text-[color:var(--color-muted)]">
+                <p class="eyebrow reveal">অর্ডার</p>
+                <h2 class="reveal reveal-1 mt-4 text-4xl sm:text-5xl">ফর্মটি পূরণ করুন</h2>
+                <div class="rule-gold reveal reveal-2 mx-auto mt-6 max-w-[180px]"></div>
+                <p class="reveal reveal-2 mt-5 text-sm text-[color:var(--color-muted)]">
                     ক্যাশ অন ডেলিভারি — পণ্য হাতে পেয়ে টাকা দিন।
                 </p>
             </div>

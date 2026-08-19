@@ -41,6 +41,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla:ital@0;1&family=Anek+Bangla:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+    {{-- CSS আসার আগেই .js বসে যায় — নাহলে লেখা এক ঝলক দেখিয়ে তারপর লুকাত।
+         JS বন্ধ থাকলে ক্লাসটা বসে না, তখন সব লেখা এমনিতেই দৃশ্যমান থাকে। --}}
+    <script>document.documentElement.classList.add('js');</script>
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('head')
 </head>

@@ -79,15 +79,38 @@ h1, h2, h3, .font-display {
   .marquee-track:hover { animation-play-state: paused; }
 }
 
-/* স্ক্রলে সেকশন ফেড-ইন */
+/* পেজ লোডে ফেড-ইন (হিরো) */
 @keyframes niswan-rise {
   from { opacity: 0; transform: translateY(18px); }
   to   { opacity: 1; transform: none; }
 }
 .rise { animation: niswan-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
+/* ── স্ক্রলে ফুটে ওঠা (শিরোনাম / সাবটাইটেল) ─────────────────────────
+   ডিফল্টে দৃশ্যমান — JS না চললে বা ব্যর্থ হলেও লেখা লুকিয়ে যাবে না।
+   <html> এ .js ক্লাস বসলে তবেই লুকিয়ে অ্যানিমেশন শুরু হয়। */
+.reveal { opacity: 1; }
+
+html.js .reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+html.js .reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* একের পর এক (আই-ব্রাউ → শিরোনাম → সাবটাইটেল) */
+html.js .reveal-1 { transition-delay: 0.10s; }
+html.js .reveal-2 { transition-delay: 0.20s; }
+html.js .reveal-3 { transition-delay: 0.30s; }
+
 @media (prefers-reduced-motion: reduce) {
   .rise, .marquee-track { animation: none; }
+  html.js .reveal { opacity: 1; transform: none; transition: none; }
   html { scroll-behavior: auto; }
 }
 

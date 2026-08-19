@@ -31,9 +31,9 @@
     <div class="mx-auto max-w-6xl px-6 sm:px-10">
         <div class="mb-10 flex flex-wrap items-end justify-between gap-6">
             <div>
-                <p class="eyebrow">গ্রাহকের কথা</p>
-                <h2 class="mt-4 text-3xl sm:text-4xl">যাঁরা আগে নিয়েছেন</h2>
-                <p class="mt-3 max-w-md text-sm text-[color:var(--color-muted)]">
+                <p class="eyebrow reveal">গ্রাহকের কথা</p>
+                <h2 class="reveal reveal-1 mt-4 text-3xl sm:text-4xl">যাঁরা আগে নিয়েছেন</h2>
+                <p class="reveal reveal-2 mt-3 max-w-md text-sm text-[color:var(--color-muted)]">
                     পেজ, ইনবক্স ও কমেন্টে আসা আসল মেসেজ — কোনোটাই সাজানো নয়।
                 </p>
             </div>
